@@ -4,11 +4,12 @@
 
 #include "panel.h"
 #include "app_menu.h"
+#include "settings.h"
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#define PANEL_HEIGHT 40
+#define PANEL_HEIGHT 48
 
 static gboolean update_clock_callback(gpointer data) {
     Panel *panel = (Panel*)data;
@@ -19,6 +20,10 @@ static gboolean update_clock_callback(gpointer data) {
 static void on_start_clicked(GtkWidget *widget, gpointer data) {
     Panel *panel = (Panel*)data;
     app_menu_show(panel->window);
+}
+
+static void on_settings_clicked(GtkWidget *widget, gpointer data) {
+    settings_show();
 }
 
 static void on_task_clicked(GtkWidget *widget, gpointer data) {
@@ -48,25 +53,52 @@ Panel* panel_new() {
     panel->container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_container_add(GTK_CONTAINER(panel->window), panel->container);
     
-    panel->start_button = gtk_button_new_with_label("⚙ Apps");
+    // Left spacer for centering (Win11 style)
+    GtkWidget *left_spacer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_box_pack_start(GTK_BOX(panel->container), left_spacer, TRUE, TRUE, 0);
+    
+    // Center area with start button and taskbar
+    GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    
+    // Start button (Windows icon style)
+    panel->start_button = gtk_button_new_with_label("⊞");
     gtk_widget_set_name(panel->start_button, "start-button");
-    gtk_widget_set_size_request(panel->start_button, 80, PANEL_HEIGHT);
+    gtk_widget_set_size_request(panel->start_button, 48, PANEL_HEIGHT);
     g_signal_connect(panel->start_button, "clicked", G_CALLBACK(on_start_clicked), panel);
-    gtk_box_pack_start(GTK_BOX(panel->container), panel->start_button, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(center_box), panel->start_button, FALSE, FALSE, 0);
     
-    gtk_box_pack_start(GTK_BOX(panel->container), gtk_separator_new(GTK_ORIENTATION_VERTICAL), FALSE, FALSE, 5);
-    
+    // Taskbar area
     panel->taskbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-    gtk_box_pack_start(GTK_BOX(panel->container), panel->taskbar, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(center_box), panel->taskbar, FALSE, FALSE, 0);
     
-    panel->systray = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-    gtk_box_pack_end(GTK_BOX(panel->container), panel->systray, FALSE, FALSE, 10);
+    gtk_box_pack_start(GTK_BOX(panel->container), center_box, FALSE, FALSE, 0);
     
+    // Right spacer
+    GtkWidget *right_spacer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_box_pack_start(GTK_BOX(panel->container), right_spacer, TRUE, TRUE, 0);
+    
+    // Right side: systray + clock
+    GtkWidget *right_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
+    
+    // Settings button
+    GtkWidget *settings_btn = gtk_button_new_with_label("⚙");
+    gtk_widget_set_name(settings_btn, "task-button");
+    g_signal_connect(settings_btn, "clicked", G_CALLBACK(on_settings_clicked), NULL);
+    gtk_box_pack_start(GTK_BOX(right_box), settings_btn, FALSE, FALSE, 0);
+    
+    // Systray placeholder
+    panel->systray = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    gtk_box_pack_start(GTK_BOX(right_box), panel->systray, FALSE, FALSE, 0);
+    
+    // Clock
     panel->clock = gtk_label_new("");
     gtk_widget_set_name(panel->clock, "clock");
-    gtk_box_pack_end(GTK_BOX(panel->container), panel->clock, FALSE, FALSE, 10);
+    gtk_box_pack_start(GTK_BOX(right_box), panel->clock, FALSE, FALSE, 8);
     panel_update_clock(panel);
     
+    gtk_box_pack_end(GTK_BOX(panel->container), right_box, FALSE, FALSE, 8);
+    
+    // Update clock every second
     g_timeout_add_seconds(1, update_clock_callback, panel);
     
     return panel;
@@ -79,7 +111,7 @@ void panel_show(Panel *panel) {
 void panel_add_task(Panel *panel, const char *title, gulong window_id) {
     GtkWidget *button = gtk_button_new_with_label(title);
     gtk_widget_set_name(button, "task-button");
-    gtk_widget_set_size_request(button, 150, PANEL_HEIGHT - 8);
+    gtk_widget_set_size_request(button, -1, PANEL_HEIGHT - 8);
     g_object_set_data(G_OBJECT(button), "window_id", GSIZE_TO_POINTER(window_id));
     g_signal_connect(button, "clicked", G_CALLBACK(on_task_clicked), GSIZE_TO_POINTER(window_id));
     gtk_box_pack_start(GTK_BOX(panel->taskbar), button, FALSE, FALSE, 2);

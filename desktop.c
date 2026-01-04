@@ -17,28 +17,68 @@ static void on_icon_clicked(GtkWidget *widget, gpointer data) {
 
 static gboolean on_draw_wallpaper(GtkWidget *widget, cairo_t *cr, gpointer data) {
     Desktop *desktop = (Desktop*)data;
+    int width = gdk_screen_width();
+    int height = gdk_screen_height();
     
     if (desktop->wallpaper_path) {
         GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(
-            desktop->wallpaper_path,
-            gdk_screen_width(),
-            gdk_screen_height(),
-            FALSE, NULL
+            desktop->wallpaper_path, width, height, FALSE, NULL
         );
         if (pixbuf) {
             gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
             cairo_paint(cr);
             g_object_unref(pixbuf);
+            return FALSE;
         }
-    } else {
-        // Default gradient background
-        cairo_pattern_t *gradient = cairo_pattern_create_linear(0, 0, 0, gdk_screen_height());
-        cairo_pattern_add_color_stop_rgb(gradient, 0, 0.1, 0.2, 0.4);
-        cairo_pattern_add_color_stop_rgb(gradient, 1, 0.05, 0.1, 0.2);
-        cairo_set_source(cr, gradient);
-        cairo_paint(cr);
-        cairo_pattern_destroy(gradient);
     }
+    
+    // Windows 11 style gradient - blue bloom
+    cairo_pattern_t *bg = cairo_pattern_create_linear(0, 0, width, height);
+    cairo_pattern_add_color_stop_rgb(bg, 0.0, 0.0, 0.02, 0.08);   // Dark blue-black
+    cairo_pattern_add_color_stop_rgb(bg, 0.3, 0.0, 0.05, 0.15);   // Deep blue
+    cairo_pattern_add_color_stop_rgb(bg, 0.5, 0.02, 0.08, 0.20);  // Blue
+    cairo_pattern_add_color_stop_rgb(bg, 0.7, 0.0, 0.05, 0.15);   // Deep blue
+    cairo_pattern_add_color_stop_rgb(bg, 1.0, 0.0, 0.02, 0.08);   // Dark blue-black
+    cairo_set_source(cr, bg);
+    cairo_paint(cr);
+    cairo_pattern_destroy(bg);
+    
+    // Add bloom effect (light spots)
+    // Center bloom
+    cairo_pattern_t *bloom1 = cairo_pattern_create_radial(
+        width * 0.5, height * 0.6, 0,
+        width * 0.5, height * 0.6, width * 0.5
+    );
+    cairo_pattern_add_color_stop_rgba(bloom1, 0.0, 0.2, 0.4, 0.8, 0.3);
+    cairo_pattern_add_color_stop_rgba(bloom1, 0.5, 0.1, 0.2, 0.5, 0.1);
+    cairo_pattern_add_color_stop_rgba(bloom1, 1.0, 0.0, 0.0, 0.0, 0.0);
+    cairo_set_source(cr, bloom1);
+    cairo_paint(cr);
+    cairo_pattern_destroy(bloom1);
+    
+    // Top-left pink bloom
+    cairo_pattern_t *bloom2 = cairo_pattern_create_radial(
+        width * 0.2, height * 0.3, 0,
+        width * 0.2, height * 0.3, width * 0.4
+    );
+    cairo_pattern_add_color_stop_rgba(bloom2, 0.0, 0.6, 0.2, 0.5, 0.2);
+    cairo_pattern_add_color_stop_rgba(bloom2, 0.5, 0.3, 0.1, 0.3, 0.1);
+    cairo_pattern_add_color_stop_rgba(bloom2, 1.0, 0.0, 0.0, 0.0, 0.0);
+    cairo_set_source(cr, bloom2);
+    cairo_paint(cr);
+    cairo_pattern_destroy(bloom2);
+    
+    // Bottom-right cyan bloom
+    cairo_pattern_t *bloom3 = cairo_pattern_create_radial(
+        width * 0.8, height * 0.7, 0,
+        width * 0.8, height * 0.7, width * 0.35
+    );
+    cairo_pattern_add_color_stop_rgba(bloom3, 0.0, 0.1, 0.5, 0.6, 0.25);
+    cairo_pattern_add_color_stop_rgba(bloom3, 0.5, 0.05, 0.25, 0.35, 0.1);
+    cairo_pattern_add_color_stop_rgba(bloom3, 1.0, 0.0, 0.0, 0.0, 0.0);
+    cairo_set_source(cr, bloom3);
+    cairo_paint(cr);
+    cairo_pattern_destroy(bloom3);
     
     return FALSE;
 }

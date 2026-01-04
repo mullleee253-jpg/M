@@ -8,8 +8,10 @@
 #include "panel.h"
 #include "window_manager.h"
 #include "app_menu.h"
+#include "settings.h"
+#include "android.h"
 
-static Desktop *desktop = NULL;
+Desktop *desktop = NULL;
 Panel *panel = NULL;
 
 int main(int argc, char *argv[]) {
@@ -24,8 +26,21 @@ int main(int argc, char *argv[]) {
         GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
     );
     
+    // Initialize settings
+    settings_init();
+    
+    // Initialize Android subsystem
+    android_init();
+    
     // Initialize desktop (wallpaper + icons)
     desktop = desktop_new();
+    
+    // Apply saved wallpaper
+    char *wallpaper = settings_get_wallpaper();
+    if (wallpaper) {
+        desktop_set_wallpaper(desktop, wallpaper);
+    }
+    
     desktop_show(desktop);
     
     // Initialize panel (taskbar)

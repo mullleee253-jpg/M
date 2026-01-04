@@ -8,7 +8,7 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share/mydesktop
 
-SRC = main.c desktop.c panel.c app_menu.c window_manager.c
+SRC = main.c desktop.c panel.c app_menu.c window_manager.c settings.c android.c
 OBJ = $(SRC:.c=.o)
 TARGET = mydesktop
 
