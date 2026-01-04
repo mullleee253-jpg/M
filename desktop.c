@@ -17,8 +17,13 @@ static void on_icon_clicked(GtkWidget *widget, gpointer data) {
 
 static gboolean on_draw_wallpaper(GtkWidget *widget, cairo_t *cr, gpointer data) {
     Desktop *desktop = (Desktop*)data;
-    int width = gdk_screen_width();
-    int height = gdk_screen_height();
+    GtkAllocation alloc;
+    gtk_widget_get_allocation(widget, &alloc);
+    int width = alloc.width;
+    int height = alloc.height;
+    
+    if (width < 100) width = 1920;
+    if (height < 100) height = 1080;
     
     if (desktop->wallpaper_path) {
         GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(
@@ -34,16 +39,15 @@ static gboolean on_draw_wallpaper(GtkWidget *widget, cairo_t *cr, gpointer data)
     
     // Windows 11 style gradient - blue bloom
     cairo_pattern_t *bg = cairo_pattern_create_linear(0, 0, width, height);
-    cairo_pattern_add_color_stop_rgb(bg, 0.0, 0.0, 0.02, 0.08);   // Dark blue-black
-    cairo_pattern_add_color_stop_rgb(bg, 0.3, 0.0, 0.05, 0.15);   // Deep blue
-    cairo_pattern_add_color_stop_rgb(bg, 0.5, 0.02, 0.08, 0.20);  // Blue
-    cairo_pattern_add_color_stop_rgb(bg, 0.7, 0.0, 0.05, 0.15);   // Deep blue
-    cairo_pattern_add_color_stop_rgb(bg, 1.0, 0.0, 0.02, 0.08);   // Dark blue-black
+    cairo_pattern_add_color_stop_rgb(bg, 0.0, 0.0, 0.02, 0.08);
+    cairo_pattern_add_color_stop_rgb(bg, 0.3, 0.0, 0.05, 0.15);
+    cairo_pattern_add_color_stop_rgb(bg, 0.5, 0.02, 0.08, 0.20);
+    cairo_pattern_add_color_stop_rgb(bg, 0.7, 0.0, 0.05, 0.15);
+    cairo_pattern_add_color_stop_rgb(bg, 1.0, 0.0, 0.02, 0.08);
     cairo_set_source(cr, bg);
     cairo_paint(cr);
     cairo_pattern_destroy(bg);
     
-    // Add bloom effect (light spots)
     // Center bloom
     cairo_pattern_t *bloom1 = cairo_pattern_create_radial(
         width * 0.5, height * 0.6, 0,
