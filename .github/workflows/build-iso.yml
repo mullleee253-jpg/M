@@ -1,1 +1,153 @@
+name: Build MyDesktop ISO
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libgtk-3-dev \
+            libx11-dev \
+            debootstrap \
+            squashfs-tools \
+            xorriso \
+            isolinux \
+            syslinux-utils \
+            grub-pc-bin \
+            grub-efi-amd64-bin \
+            mtools
+      
+      - name: Build MyDesktop
+        run: make
+      
+      - name: Create ISO filesystem
+        run: |
+          sudo mkdir -p iso_root/{boot/grub,live,EFI/boot}
+          
+          # Create minimal Debian rootfs
+          sudo debootstrap --arch=amd64 --variant=minbase bookworm rootfs http://deb.debian.org/debian
+          
+          # Install required packages in chroot
+          sudo mount --bind /dev rootfs/dev
+          sudo mount --bind /proc rootfs/proc
+          sudo mount --bind /sys rootfs/sys
+          
+          sudo chroot rootfs apt-get update
+          sudo chroot rootfs apt-get install -y --no-install-recommends \
+            linux-image-amd64 \
+            live-boot \
+            systemd-sysv \
+            xorg \
+            xinit \
+            openbox \
+            libgtk-3-0 \
+            libx11-6 \
+            dbus-x11 \
+            fonts-dejavu \
+            adwaita-icon-theme \
+            network-manager \
+            pulseaudio \
+            sudo
+          
+          # Copy MyDesktop binary
+          sudo cp mydesktop rootfs/usr/local/bin/
+          sudo chmod +x rootfs/usr/local/bin/mydesktop
+          
+          # Copy theme
+          sudo mkdir -p rootfs/usr/share/mydesktop
+          sudo cp theme.css rootfs/usr/share/mydesktop/
+          
+          # Create auto-start script
+          sudo tee rootfs/etc/xdg/openbox/autostart << 'AUTOSTART'
+          # Start MyDesktop
+          /usr/local/bin/mydesktop &
+          AUTOSTART
+          
+          # Create user
+          sudo chroot rootfs useradd -m -s /bin/bash -G sudo,audio,video user
+          echo "user:user" | sudo chroot rootfs chpasswd
+          
+          # Auto-login and start X
+          sudo mkdir -p rootfs/etc/systemd/system/getty@tty1.service.d
+          sudo tee rootfs/etc/systemd/system/getty@tty1.service.d/autologin.conf << 'AUTOLOGIN'
+          [Service]
+          ExecStart=
+          ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
+          AUTOLOGIN
+          
+          # Start X on login
+          sudo tee rootfs/home/user/.bash_profile << 'BASHPROFILE'
+          if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+            startx
+          fi
+          BASHPROFILE
+          
+          # Xinitrc
+          sudo tee rootfs/home/user/.xinitrc << 'XINITRC'
+          exec openbox-session
+          XINITRC
+          
+          sudo chroot rootfs chown user:user /home/user/.bash_profile /home/user/.xinitrc
+          
+          # Cleanup
+          sudo chroot rootfs apt-get clean
+          sudo rm -rf rootfs/var/lib/apt/lists/*
+          
+          sudo umount rootfs/dev rootfs/proc rootfs/sys
+      
+      - name: Create squashfs
+        run: |
+          sudo mksquashfs rootfs iso_root/live/filesystem.squashfs -comp xz -e boot
+          sudo cp rootfs/boot/vmlinuz-* iso_root/boot/vmlinuz
+          sudo cp rootfs/boot/initrd.img-* iso_root/boot/initrd
+      
+      - name: Create GRUB config
+        run: |
+          sudo tee iso_root/boot/grub/grub.cfg << 'GRUBCFG'
+          set timeout=5
+          set default=0
+          
+          menuentry "MyDesktop Live" {
+            linux /boot/vmlinuz boot=live quiet splash
+            initrd /boot/initrd
+          }
+          
+          menuentry "MyDesktop Live (Safe Mode)" {
+            linux /boot/vmlinuz boot=live nomodeset
+            initrd /boot/initrd
+          }
+          GRUBCFG
+      
+      - name: Build ISO
+        run: |
+          sudo grub-mkrescue -o MyDesktop-live.iso iso_root \
+            --product-name="MyDesktop" \
+            --product-version="1.0"
+      
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyDesktop-ISO
+          path: MyDesktop-live.iso
+          retention-days: 30
+      
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: MyDesktop-live.iso
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
