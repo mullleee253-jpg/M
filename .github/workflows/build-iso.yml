@@ -56,10 +56,16 @@ jobs:
             libx11-6 \
             dbus-x11 \
             fonts-dejavu \
+            fonts-noto \
             adwaita-icon-theme \
             network-manager \
             pulseaudio \
-            sudo
+            sudo \
+            wmctrl \
+            lxappearance \
+            pcmanfm \
+            xterm \
+            firefox-esr
           
           # Copy MyDesktop binary
           sudo cp mydesktop rootfs/usr/local/bin/
@@ -78,6 +84,9 @@ jobs:
           # Create user
           sudo chroot rootfs useradd -m -s /bin/bash -G sudo,audio,video user
           echo "user:user" | sudo chroot rootfs chpasswd
+          
+          # Set timezone (Moscow by default, user can change)
+          sudo chroot rootfs ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
           
           # Auto-login and start X
           sudo mkdir -p rootfs/etc/systemd/system/getty@tty1.service.d
@@ -150,4 +159,3 @@ jobs:
           files: MyDesktop-live.iso
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
