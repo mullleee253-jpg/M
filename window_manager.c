@@ -58,7 +58,12 @@ static gboolean check_windows(gpointer data) {
         for (unsigned long i = 0; i < nitems; i++) {
             char *name = get_window_name(windows[i]);
             if (name && strlen(name) > 0) {
-                panel_add_task(panel, name, windows[i]);
+                // Skip our own windows
+                if (strcmp(name, "mydesktop") != 0 && 
+                    strcmp(name, "Настройки") != 0 &&
+                    strstr(name, "MyDesktop") == NULL) {
+                    panel_add_task(panel, name, windows[i]);
+                }
                 free(name);
             }
         }
