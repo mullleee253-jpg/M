@@ -1,0 +1,104 @@
+/* MyDesktop Theme - Modern Dark */
+
+/* Panel */
+#panel {
+    background: linear-gradient(to bottom, #2d2d2d, #1a1a1a);
+    border-top: 1px solid #444;
+}
+
+#start-button {
+    background: linear-gradient(to bottom, #4a90d9, #357abd);
+    color: white;
+    border: none;
+    border-radius: 0;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#start-button:hover {
+    background: linear-gradient(to bottom, #5a9fe9, #4589cd);
+}
+
+#task-button {
+    background: #3d3d3d;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 3px;
+    margin: 4px 2px;
+    padding: 0 10px;
+}
+
+#task-button:hover {
+    background: #4d4d4d;
+    border-color: #666;
+}
+
+#clock {
+    color: white;
+    font-size: 11px;
+    font-family: monospace;
+}
+
+/* App Menu */
+#app-menu {
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 8px 8px 0 0;
+}
+
+#app-search {
+    background: #1a1a1a;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+#app-button {
+    background: transparent;
+    color: #eee;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+#app-button:hover {
+    background: #4a90d9;
+}
+
+/* Desktop Icons */
+#desktop-icon {
+    background: transparent;
+    border: none;
+    padding: 10px;
+    min-width: 80px;
+}
+
+#desktop-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+#icon-label {
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    font-size: 11px;
+}
+
+/* Scrollbars */
+scrollbar {
+    background: #1a1a1a;
+}
+
+scrollbar slider {
+    background: #555;
+    border-radius: 10px;
+    min-width: 8px;
+    min-height: 8px;
+}
+
+scrollbar slider:hover {
+    background: #666;
+}

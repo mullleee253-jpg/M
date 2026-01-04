@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=MyDesktop
+Comment=Custom Linux Desktop Environment
+Exec=/usr/local/bin/mydesktop
+Type=Application
+DesktopNames=MyDesktop
