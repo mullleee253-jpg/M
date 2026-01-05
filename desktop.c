@@ -95,10 +95,19 @@ Desktop* desktop_new() {
     desktop->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_type_hint(GTK_WINDOW(desktop->window), GDK_WINDOW_TYPE_HINT_DESKTOP);
     gtk_window_set_decorated(GTK_WINDOW(desktop->window), FALSE);
-    gtk_window_fullscreen(GTK_WINDOW(desktop->window));
     
-    // Drawing area for wallpaper
+    // Get screen size
+    GdkScreen *screen = gdk_screen_get_default();
+    int width = gdk_screen_get_width(screen);
+    int height = gdk_screen_get_height(screen);
+    
+    gtk_window_set_default_size(GTK_WINDOW(desktop->window), width, height);
+    gtk_window_move(GTK_WINDOW(desktop->window), 0, 0);
+    gtk_widget_set_size_request(desktop->window, width, height);
+    
+    // Drawing area for wallpaper - set to full screen size
     GtkWidget *drawing_area = gtk_drawing_area_new();
+    gtk_widget_set_size_request(drawing_area, width, height);
     g_signal_connect(drawing_area, "draw", G_CALLBACK(on_draw_wallpaper), desktop);
     
     // Overlay for icons
