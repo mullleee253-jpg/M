@@ -4,6 +4,7 @@
 
 #include "desktop.h"
 #include <gdk/gdk.h>
+#include <pango/pango.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
@@ -127,6 +128,31 @@ Desktop* desktop_new() {
 
 void desktop_show(Desktop *desktop) {
     gtk_widget_show_all(desktop->window);
+    
+    // Add default desktop icons
+    DesktopIcon *files_icon = malloc(sizeof(DesktopIcon));
+    files_icon->name = "Проводник";
+    files_icon->icon_path = NULL;
+    files_icon->exec_command = "pcmanfm";
+    files_icon->x = 20;
+    files_icon->y = 20;
+    desktop_add_icon(desktop, files_icon);
+    
+    DesktopIcon *firefox_icon = malloc(sizeof(DesktopIcon));
+    firefox_icon->name = "Firefox";
+    firefox_icon->icon_path = NULL;
+    firefox_icon->exec_command = "firefox-esr";
+    firefox_icon->x = 20;
+    firefox_icon->y = 120;
+    desktop_add_icon(desktop, firefox_icon);
+    
+    DesktopIcon *term_icon = malloc(sizeof(DesktopIcon));
+    term_icon->name = "Терминал";
+    term_icon->icon_path = NULL;
+    term_icon->exec_command = "xterm";
+    term_icon->x = 20;
+    term_icon->y = 220;
+    desktop_add_icon(desktop, term_icon);
 }
 
 void desktop_set_wallpaper(Desktop *desktop, const char *path) {
@@ -141,14 +167,30 @@ void desktop_add_icon(Desktop *desktop, DesktopIcon *icon) {
     
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     
-    // Icon image
-    GtkWidget *image = gtk_image_new_from_file(icon->icon_path);
+    // Icon image - use system icons
+    GtkWidget *image;
+    if (icon->icon_path) {
+        image = gtk_image_new_from_file(icon->icon_path);
+    } else {
+        // Determine icon based on exec command
+        const char *icon_name = "application-x-executable";
+        if (strstr(icon->exec_command, "pcmanfm") || strstr(icon->exec_command, "file")) {
+            icon_name = "system-file-manager";
+        } else if (strstr(icon->exec_command, "firefox")) {
+            icon_name = "firefox-esr";
+        } else if (strstr(icon->exec_command, "term") || strstr(icon->exec_command, "xterm")) {
+            icon_name = "utilities-terminal";
+        }
+        image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_DIALOG);
+    }
     gtk_image_set_pixel_size(GTK_IMAGE(image), 48);
     gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
     
     // Label
     GtkWidget *label = gtk_label_new(icon->name);
     gtk_widget_set_name(label, "icon-label");
+    gtk_label_set_max_width_chars(GTK_LABEL(label), 12);
+    gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
     gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
     
     gtk_container_add(GTK_CONTAINER(button), box);
