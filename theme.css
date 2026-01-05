@@ -16,15 +16,27 @@
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 18px;
-    padding: 8px 16px;
-    margin: 4px;
+    padding: 8px;
+    margin: 2px;
     transition: all 150ms ease;
 }
 
 #start-button:hover {
     background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.05);
+}
+
+#taskbar-icon {
+    background: transparent;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 4px;
+    margin: 2px;
+    transition: all 150ms ease;
+}
+
+#taskbar-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 #task-button {
@@ -40,7 +52,6 @@
 
 #task-button:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.02);
 }
 
 #clock {
@@ -234,14 +245,3 @@ list {
 row {
     background: transparent;
     color: white;
-    transition: all 150ms ease;
-}
-
-row:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Window animations */
-window {
-    transition: opacity 200ms ease;
-}
