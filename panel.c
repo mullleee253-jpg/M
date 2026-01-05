@@ -1,5 +1,5 @@
 /*
- * Panel - Taskbar with start menu, tasks, systray, clock
+ * Panel - Windows 11 style taskbar
  */
 
 #include "panel.h"
@@ -26,11 +26,40 @@ static void on_settings_clicked(GtkWidget *widget, gpointer data) {
     settings_show();
 }
 
+static void on_firefox_clicked(GtkWidget *widget, gpointer data) {
+    g_spawn_command_line_async("firefox-esr", NULL);
+}
+
+static void on_files_clicked(GtkWidget *widget, gpointer data) {
+    g_spawn_command_line_async("pcmanfm", NULL);
+}
+
+static void on_terminal_clicked(GtkWidget *widget, gpointer data) {
+    g_spawn_command_line_async("xterm", NULL);
+}
+
 static void on_task_clicked(GtkWidget *widget, gpointer data) {
     gulong window_id = GPOINTER_TO_SIZE(data);
     char cmd[256];
     snprintf(cmd, sizeof(cmd), "wmctrl -i -a 0x%lx", window_id);
     system(cmd);
+}
+
+static GtkWidget* create_taskbar_button(const char *icon_name, const char *tooltip, GCallback callback) {
+    GtkWidget *button = gtk_button_new();
+    gtk_widget_set_name(button, "taskbar-icon");
+    gtk_widget_set_tooltip_text(button, tooltip);
+    gtk_widget_set_size_request(button, 44, 44);
+    
+    GtkWidget *icon = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_LARGE_TOOLBAR);
+    gtk_image_set_pixel_size(GTK_IMAGE(icon), 24);
+    gtk_container_add(GTK_CONTAINER(button), icon);
+    
+    if (callback) {
+        g_signal_connect(button, "clicked", callback, NULL);
+    }
+    
+    return button;
 }
 
 Panel* panel_new() {
@@ -43,8 +72,10 @@ Panel* panel_new() {
     gtk_window_set_skip_pager_hint(GTK_WINDOW(panel->window), TRUE);
     gtk_widget_set_name(panel->window, "panel");
     
-    int screen_width = gdk_screen_width();
-    int screen_height = gdk_screen_height();
+    GdkScreen *screen = gdk_screen_get_default();
+    int screen_width = gdk_screen_get_width(screen);
+    int screen_height = gdk_screen_get_height(screen);
+    
     gtk_window_move(GTK_WINDOW(panel->window), 0, screen_height - PANEL_HEIGHT);
     gtk_window_set_default_size(GTK_WINDOW(panel->window), screen_width, PANEL_HEIGHT);
     gtk_window_stick(GTK_WINDOW(panel->window));
@@ -53,52 +84,83 @@ Panel* panel_new() {
     panel->container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_container_add(GTK_CONTAINER(panel->window), panel->container);
     
-    // Left spacer for centering (Win11 style)
-    GtkWidget *left_spacer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(panel->container), left_spacer, TRUE, TRUE, 0);
+    // === LEFT SIDE ===
+    GtkWidget *left_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    gtk_widget_set_margin_start(left_box, 8);
     
-    // Center area with start button and taskbar
-    GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-    
-    // Start button (Windows icon style)
-    panel->start_button = gtk_button_new_with_label("⊞");
+    // Start button (Windows logo)
+    panel->start_button = gtk_button_new();
     gtk_widget_set_name(panel->start_button, "start-button");
-    gtk_widget_set_size_request(panel->start_button, 48, PANEL_HEIGHT);
+    gtk_widget_set_size_request(panel->start_button, 44, 44);
+    GtkWidget *start_icon = gtk_image_new_from_icon_name("view-grid-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+    gtk_image_set_pixel_size(GTK_IMAGE(start_icon), 20);
+    gtk_container_add(GTK_CONTAINER(panel->start_button), start_icon);
     g_signal_connect(panel->start_button, "clicked", G_CALLBACK(on_start_clicked), panel);
-    gtk_box_pack_start(GTK_BOX(center_box), panel->start_button, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(left_box), panel->start_button, FALSE, FALSE, 0);
     
-    // Taskbar area
+    // Search (placeholder)
+    GtkWidget *search_btn = create_taskbar_button("edit-find-symbolic", "Поиск", NULL);
+    gtk_box_pack_start(GTK_BOX(left_box), search_btn, FALSE, FALSE, 0);
+    
+    gtk_box_pack_start(GTK_BOX(panel->container), left_box, FALSE, FALSE, 0);
+    
+    // === CENTER - Pinned apps + running tasks ===
+    GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+    gtk_widget_set_halign(center_box, GTK_ALIGN_CENTER);
+    
+    // Pinned: File Manager
+    GtkWidget *files_btn = create_taskbar_button("system-file-manager", "Проводник", G_CALLBACK(on_files_clicked));
+    gtk_box_pack_start(GTK_BOX(center_box), files_btn, FALSE, FALSE, 0);
+    
+    // Pinned: Firefox
+    GtkWidget *firefox_btn = create_taskbar_button("firefox-esr", "Firefox", G_CALLBACK(on_firefox_clicked));
+    gtk_box_pack_start(GTK_BOX(center_box), firefox_btn, FALSE, FALSE, 0);
+    
+    // Pinned: Terminal
+    GtkWidget *term_btn = create_taskbar_button("utilities-terminal", "Терминал", G_CALLBACK(on_terminal_clicked));
+    gtk_box_pack_start(GTK_BOX(center_box), term_btn, FALSE, FALSE, 0);
+    
+    // Pinned: Settings
+    GtkWidget *settings_btn = create_taskbar_button("preferences-system", "Настройки", G_CALLBACK(on_settings_clicked));
+    gtk_box_pack_start(GTK_BOX(center_box), settings_btn, FALSE, FALSE, 0);
+    
+    // Separator
+    GtkWidget *sep = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+    gtk_widget_set_margin_start(sep, 8);
+    gtk_widget_set_margin_end(sep, 8);
+    gtk_box_pack_start(GTK_BOX(center_box), sep, FALSE, FALSE, 0);
+    
+    // Running tasks area
     panel->taskbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
     gtk_box_pack_start(GTK_BOX(center_box), panel->taskbar, FALSE, FALSE, 0);
     
-    gtk_box_pack_start(GTK_BOX(panel->container), center_box, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(panel->container), center_box, TRUE, FALSE, 0);
     
-    // Right spacer
-    GtkWidget *right_spacer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(panel->container), right_spacer, TRUE, TRUE, 0);
-    
-    // Right side: systray + clock
+    // === RIGHT SIDE - Systray + Clock ===
     GtkWidget *right_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
+    gtk_widget_set_margin_end(right_box, 12);
     
-    // Settings button
-    GtkWidget *settings_btn = gtk_button_new_with_label("⚙");
-    gtk_widget_set_name(settings_btn, "task-button");
-    g_signal_connect(settings_btn, "clicked", G_CALLBACK(on_settings_clicked), NULL);
-    gtk_box_pack_start(GTK_BOX(right_box), settings_btn, FALSE, FALSE, 0);
-    
-    // Systray placeholder
+    // Systray area
     panel->systray = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-    gtk_box_pack_start(GTK_BOX(right_box), panel->systray, FALSE, FALSE, 0);
+    
+    // Network icon
+    GtkWidget *net_icon = gtk_image_new_from_icon_name("network-wireless-symbolic", GTK_ICON_SIZE_MENU);
+    gtk_box_pack_start(GTK_BOX(panel->systray), net_icon, FALSE, FALSE, 0);
+    
+    // Volume icon
+    GtkWidget *vol_icon = gtk_image_new_from_icon_name("audio-volume-high-symbolic", GTK_ICON_SIZE_MENU);
+    gtk_box_pack_start(GTK_BOX(panel->systray), vol_icon, FALSE, FALSE, 0);
+    
+    gtk_box_pack_end(GTK_BOX(right_box), panel->systray, FALSE, FALSE, 0);
     
     // Clock
     panel->clock = gtk_label_new("");
     gtk_widget_set_name(panel->clock, "clock");
-    gtk_box_pack_start(GTK_BOX(right_box), panel->clock, FALSE, FALSE, 8);
+    gtk_box_pack_end(GTK_BOX(right_box), panel->clock, FALSE, FALSE, 0);
     panel_update_clock(panel);
     
-    gtk_box_pack_end(GTK_BOX(panel->container), right_box, FALSE, FALSE, 8);
+    gtk_box_pack_end(GTK_BOX(panel->container), right_box, FALSE, FALSE, 0);
     
-    // Update clock every second
     g_timeout_add_seconds(1, update_clock_callback, panel);
     
     return panel;
