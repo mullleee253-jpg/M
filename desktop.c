@@ -8,8 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// From main.c
-extern void launch_file_manager();
+extern void launch_file_manager(void);
 
 static void on_icon_clicked(GtkWidget *widget, gpointer data) {
     DesktopIcon *icon = (DesktopIcon*)data;
@@ -24,10 +23,11 @@ static void on_icon_clicked(GtkWidget *widget, gpointer data) {
 
 static gboolean on_draw_wallpaper(GtkWidget *widget, cairo_t *cr, gpointer data) {
     Desktop *desktop = (Desktop*)data;
-    GtkAllocation alloc;
-    gtk_widget_get_allocation(widget, &alloc);
-    int width = alloc.width > 100 ? alloc.width : 1920;
-    int height = alloc.height > 100 ? alloc.height : 1080;
+    int width = gtk_widget_get_allocated_width(widget);
+    int height = gtk_widget_get_allocated_height(widget);
+    
+    if (width < 100) width = 1920;
+    if (height < 100) height = 1080;
     
     if (desktop->wallpaper_path) {
         GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(
@@ -68,7 +68,7 @@ static gboolean on_draw_wallpaper(GtkWidget *widget, cairo_t *cr, gpointer data)
     return FALSE;
 }
 
-Desktop* desktop_new() {
+Desktop* desktop_new(void) {
     Desktop *desktop = malloc(sizeof(Desktop));
     desktop->wallpaper_path = NULL;
     
@@ -76,9 +76,12 @@ Desktop* desktop_new() {
     gtk_window_set_type_hint(GTK_WINDOW(desktop->window), GDK_WINDOW_TYPE_HINT_DESKTOP);
     gtk_window_set_decorated(GTK_WINDOW(desktop->window), FALSE);
     
-    GdkScreen *screen = gdk_screen_get_default();
-    int width = gdk_screen_get_width(screen);
-    int height = gdk_screen_get_height(screen);
+    GdkDisplay *display = gdk_display_get_default();
+    GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+    GdkRectangle geometry;
+    gdk_monitor_get_geometry(monitor, &geometry);
+    int width = geometry.width;
+    int height = geometry.height;
     
     gtk_window_set_default_size(GTK_WINDOW(desktop->window), width, height);
     gtk_window_move(GTK_WINDOW(desktop->window), 0, 0);
@@ -104,7 +107,6 @@ Desktop* desktop_new() {
 void desktop_show(Desktop *desktop) {
     gtk_widget_show_all(desktop->window);
     
-    // Проводник - свой file manager
     DesktopIcon *files_icon = malloc(sizeof(DesktopIcon));
     files_icon->name = "Проводник";
     files_icon->icon_path = NULL;
@@ -113,7 +115,6 @@ void desktop_show(Desktop *desktop) {
     files_icon->y = 20;
     desktop_add_icon(desktop, files_icon);
     
-    // Firefox
     DesktopIcon *firefox_icon = malloc(sizeof(DesktopIcon));
     firefox_icon->name = "Firefox";
     firefox_icon->icon_path = NULL;
@@ -122,7 +123,6 @@ void desktop_show(Desktop *desktop) {
     firefox_icon->y = 120;
     desktop_add_icon(desktop, firefox_icon);
     
-    // Терминал
     DesktopIcon *term_icon = malloc(sizeof(DesktopIcon));
     term_icon->name = "Терминал";
     term_icon->icon_path = NULL;
