@@ -24,29 +24,18 @@ static void on_apk_selected(GtkFileChooserButton *button, gpointer data) {
 }
 
 static void on_install_clicked(GtkButton *button, gpointer data) {
-    GtkWidget *dialog = gtk_file_chooser_dialog_new(
-        "Выберите APK файл",
-        GTK_WINDOW(installer_window),
-        GTK_FILE_CHOOSER_ACTION_OPEN,
-        "Отмена", GTK_RESPONSE_CANCEL,
-        "Установить", GTK_RESPONSE_ACCEPT,
-        NULL
+    // Open file manager in Downloads folder for APK selection
+    g_spawn_command_line_async("pcmanfm ~/Downloads", NULL);
+    
+    GtkWidget *info = gtk_message_dialog_new(
+        NULL,
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Откройте APK файл в проводнике.\n\nДля установки используйте команду в терминале:\nwaydroid app install /путь/к/файлу.apk"
     );
-    
-    GtkFileFilter *filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter, "APK файлы");
-    gtk_file_filter_add_pattern(filter, "*.apk");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
-    
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        if (filename) {
-            android_install_apk(filename);
-            g_free(filename);
-        }
-    }
-    
-    gtk_widget_destroy(dialog);
+    gtk_dialog_run(GTK_DIALOG(info));
+    gtk_widget_destroy(info);
 }
 
 void android_init() {
