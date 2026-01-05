@@ -63,7 +63,7 @@ static GtkWidget* create_taskbar_button(const char *icon_name, const char *toolt
     return button;
 }
 
-Panel* panel_new() {
+Panel* panel_new(void) {
     Panel *panel = malloc(sizeof(Panel));
     
     panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -73,9 +73,12 @@ Panel* panel_new() {
     gtk_window_set_skip_pager_hint(GTK_WINDOW(panel->window), TRUE);
     gtk_widget_set_name(panel->window, "panel");
     
-    GdkScreen *screen = gdk_screen_get_default();
-    int screen_width = gdk_screen_get_width(screen);
-    int screen_height = gdk_screen_get_height(screen);
+    GdkDisplay *display = gdk_display_get_default();
+    GdkMonitor *monitor = gdk_display_get_primary_monitor(display);
+    GdkRectangle geometry;
+    gdk_monitor_get_geometry(monitor, &geometry);
+    int screen_width = geometry.width;
+    int screen_height = geometry.height;
     
     gtk_window_move(GTK_WINDOW(panel->window), 0, screen_height - PANEL_HEIGHT);
     gtk_window_set_default_size(GTK_WINDOW(panel->window), screen_width, PANEL_HEIGHT);
@@ -202,6 +205,3 @@ void panel_update_clock(Panel *panel) {
     gtk_label_set_text(GTK_LABEL(panel->clock), buffer);
 }
 
-void panel_free(Panel *panel) {
-    gtk_widget_destroy(panel->window);
-    free(panel);
