@@ -25,14 +25,8 @@ install: $(TARGET)
 	install -d $(DESTDIR)$(DATADIR)
 	install -m 755 $(TARGET) $(DESTDIR)$(BINDIR)/
 	install -m 644 theme.css $(DESTDIR)$(DATADIR)/
-	install -m 644 mydesktop.desktop $(DESTDIR)/usr/share/xsessions/
-
-uninstall:
-	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
-	rm -rf $(DESTDIR)$(DATADIR)
-	rm -f $(DESTDIR)/usr/share/xsessions/mydesktop.desktop
 
 clean:
 	rm -f $(OBJ) $(TARGET)
 
-.PHONY: all install uninstall clean
+.PHONY: all install clean
