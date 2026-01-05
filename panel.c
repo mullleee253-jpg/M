@@ -31,7 +31,8 @@ static void on_firefox_clicked(GtkWidget *widget, gpointer data) {
 }
 
 static void on_files_clicked(GtkWidget *widget, gpointer data) {
-    g_spawn_command_line_async("pcmanfm", NULL);
+    extern void launch_file_manager();
+    launch_file_manager();
 }
 
 static void on_terminal_clicked(GtkWidget *widget, gpointer data) {
@@ -204,4 +205,3 @@ void panel_update_clock(Panel *panel) {
 void panel_free(Panel *panel) {
     gtk_widget_destroy(panel->window);
     free(panel);
-}
