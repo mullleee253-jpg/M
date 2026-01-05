@@ -16,7 +16,7 @@ typedef struct {
     int x, y;
 } DesktopIcon;
 
-Desktop* desktop_new();
+Desktop* desktop_new(void);
 void desktop_show(Desktop *desktop);
 void desktop_set_wallpaper(Desktop *desktop, const char *path);
 void desktop_add_icon(Desktop *desktop, DesktopIcon *icon);
