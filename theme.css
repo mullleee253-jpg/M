@@ -245,3 +245,187 @@ list {
 row {
     background: transparent;
     color: white;
+    transition: all 150ms ease;
+}
+
+row:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Window animations */
+window {
+    transition: opacity 200ms ease;
+}
+
+/* ========== FILE MANAGER STYLES ========== */
+
+#file-manager {
+    background: #1a1a1a;
+}
+
+#fm-sidebar {
+    background: #151515;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#fm-sidebar row {
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 200ms ease;
+}
+
+#fm-sidebar row:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#fm-sidebar row:selected {
+    background: rgba(96, 205, 255, 0.2);
+}
+
+#fm-path {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: white;
+    transition: all 200ms ease;
+}
+
+#fm-path:focus {
+    border-color: #60cdff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+#fm-nav-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    transition: all 150ms ease;
+}
+
+#fm-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+}
+
+#fm-icon-view {
+    background: #1a1a1a;
+    padding: 16px;
+}
+
+#fm-icon-view:selected {
+    background: rgba(96, 205, 255, 0.3);
+    border-radius: 8px;
+}
+
+#fm-icon-view *:selected {
+    background: rgba(96, 205, 255, 0.25);
+    border-radius: 8px;
+}
+
+/* ========== ENHANCED ANIMATIONS ========== */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Smooth hover effects */
+button {
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+    transform: scale(1.02);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Panel animations */
+#panel {
+    transition: all 200ms ease;
+}
+
+#start-button:active,
+#taskbar-icon:active,
+#task-button:active {
+    transform: scale(0.95);
+}
+
+/* Menu animations */
+#app-menu {
+    animation: scaleIn 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Desktop icon animations */
+#desktop-icon {
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#desktop-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#desktop-icon:active {
+    transform: scale(0.95);
+}
+
+/* Settings animations */
+#settings-item {
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#settings-item:hover {
+    padding-left: 24px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#settings-card {
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#settings-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar animations */
+scrollbar slider {
+    transition: all 200ms ease;
+}
+
+scrollbar slider:hover {
+    min-width: 10px;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* Focus animations */
+*:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(96, 205, 255, 0.4);
+}
+
+/* Loading spinner */
+spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
