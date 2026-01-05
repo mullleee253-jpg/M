@@ -12,7 +12,7 @@ typedef struct {
     GtkWidget *clock;
 } Panel;
 
-Panel* panel_new();
+Panel* panel_new(void);
 void panel_show(Panel *panel);
 void panel_add_task(Panel *panel, const char *title, gulong window_id);
 void panel_remove_task(Panel *panel, gulong window_id);
