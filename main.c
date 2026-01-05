@@ -10,16 +10,28 @@
 #include "app_menu.h"
 #include "settings.h"
 #include "android.h"
+#include "file_manager.h"
 
 Desktop *desktop = NULL;
 Panel *panel = NULL;
+FileManager *file_manager = NULL;
+
+// Global file manager launcher
+void launch_file_manager() {
+    if (!file_manager) {
+        file_manager = file_manager_new();
+    }
+    file_manager_show(file_manager);
+}
 
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
     
-    // Load CSS theme
+    // Load CSS theme - try local first, then system
     GtkCssProvider *css = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(css, "/usr/share/mydesktop/theme.css", NULL);
+    if (!gtk_css_provider_load_from_path(css, "/usr/share/mydesktop/theme.css", NULL)) {
+        gtk_css_provider_load_from_path(css, "theme.css", NULL);
+    }
     gtk_style_context_add_provider_for_screen(
         gdk_screen_get_default(),
         GTK_STYLE_PROVIDER(css),
@@ -31,6 +43,9 @@ int main(int argc, char *argv[]) {
     
     // Initialize Android subsystem
     android_init();
+    
+    // Initialize file manager
+    file_manager = file_manager_new();
     
     // Initialize desktop (wallpaper + icons)
     desktop = desktop_new();
