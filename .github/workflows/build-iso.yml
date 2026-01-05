@@ -62,7 +62,8 @@ jobs:
             sudo \
             wmctrl \
             firefox-esr \
-            xterm
+            xterm \
+            pcmanfm
           
           # Copy MyDesktop binary
           sudo cp mydesktop rootfs/usr/local/bin/
