@@ -2,6 +2,7 @@
 
 * {
     color: white;
+    transition: all 200ms ease;
 }
 
 /* Panel - Centered taskbar like Win11 */
@@ -18,10 +19,12 @@
     font-size: 18px;
     padding: 8px 16px;
     margin: 4px;
+    transition: all 150ms ease;
 }
 
 #start-button:hover {
     background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
 }
 
 #task-button {
@@ -32,10 +35,12 @@
     margin: 4px 2px;
     padding: 8px 16px;
     font-size: 12px;
+    transition: all 150ms ease;
 }
 
 #task-button:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
 }
 
 #clock {
@@ -59,6 +64,12 @@
     padding: 12px 16px;
     margin: 16px;
     font-size: 14px;
+    transition: all 200ms ease;
+}
+
+#app-search:focus {
+    border-color: #60cdff;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 #app-button {
@@ -69,10 +80,12 @@
     padding: 12px 16px;
     margin: 2px 8px;
     font-size: 13px;
+    transition: all 150ms ease;
 }
 
 #app-button:hover {
     background: rgba(255, 255, 255, 0.1);
+    padding-left: 20px;
 }
 
 /* Desktop Icons */
@@ -82,10 +95,12 @@
     padding: 12px;
     min-width: 90px;
     border-radius: 8px;
+    transition: all 150ms ease;
 }
 
 #desktop-icon:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
 }
 
 #icon-label {
@@ -117,10 +132,12 @@
     border-radius: 8px;
     padding: 12px 16px;
     font-size: 14px;
+    transition: all 150ms ease;
 }
 
 #settings-item:hover {
     background: rgba(255, 255, 255, 0.1);
+    padding-left: 20px;
 }
 
 #settings-card {
@@ -129,6 +146,12 @@
     padding: 16px;
     margin: 8px 24px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 200ms ease;
+}
+
+#settings-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 #settings-card label {
@@ -143,10 +166,12 @@
     border-radius: 6px;
     padding: 8px 24px;
     font-weight: bold;
+    transition: all 150ms ease;
 }
 
 #primary-button:hover {
     background: #7dd7ff;
+    transform: scale(1.02);
 }
 
 #secondary-button {
@@ -155,6 +180,11 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     padding: 8px 24px;
+    transition: all 150ms ease;
+}
+
+#secondary-button:hover {
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* Scrollbars */
@@ -167,12 +197,18 @@ scrollbar slider {
     border-radius: 10px;
     min-width: 6px;
     min-height: 6px;
+    transition: all 150ms ease;
+}
+
+scrollbar slider:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 /* Switch toggle */
 switch {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 12px;
+    transition: all 200ms ease;
 }
 
 switch:checked {
@@ -198,8 +234,14 @@ list {
 row {
     background: transparent;
     color: white;
+    transition: all 150ms ease;
 }
 
 row:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+/* Window animations */
+window {
+    transition: opacity 200ms ease;
 }
