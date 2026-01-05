@@ -56,16 +56,13 @@ jobs:
             libx11-6 \
             dbus-x11 \
             fonts-dejavu \
-            fonts-noto \
             adwaita-icon-theme \
             network-manager \
             pulseaudio \
             sudo \
             wmctrl \
-            lxappearance \
-            pcmanfm \
-            xterm \
-            firefox-esr
+            firefox-esr \
+            xterm
           
           # Copy MyDesktop binary
           sudo cp mydesktop rootfs/usr/local/bin/
